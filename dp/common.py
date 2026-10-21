@@ -40,13 +40,15 @@ def evaluate(model, x, y, batch_size=1000):
 
 
 @torch.no_grad()
-def recalibrate_bn(model, x, y, batch_size=256, n_batches=40):
-    """Re-estimate BatchNorm running stats on (unaugmented) training data after pruning."""
+def recalibrate_bn(model, x, y, batch_size=256, n_batches=40, seed=0):
+    """Re-estimate BatchNorm running stats after pruning on *augmented* training batches (same distribution
+    the stats were learned under; unaugmented images cost ~1.5 pts even on the dense model)."""
     for m in model.modules():
         if isinstance(m, torch.nn.modules.batchnorm._BatchNorm):
             m.reset_running_stats(); m.momentum = None  # cumulative average
+    gen = make_gen(x.device, seed)
     model.train()
-    for i, (xb, _) in enumerate(iterate(x, y, batch_size, shuffle=False)):
+    for i, (xb, _) in enumerate(iterate(x, y, batch_size, shuffle=True, gen=gen, train=True)):
         if i >= n_batches: break
         model(xb)
     model.eval()
