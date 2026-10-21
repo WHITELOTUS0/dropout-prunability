@@ -20,7 +20,7 @@ Pruning: global unstructured magnitude pruning over all Conv2d/Linear weights (B
 sparsities {0,20,40,60,70,80,90,95}%, explicit boolean masks re-applied after every optimizer step; effective sparsity is asserted.
 
 ## Running on Kaggle
-1. Code: https://github.com/WHITELOTUS0/dropout-prunability (already set in `kaggle_notebook.ipynb`).
+1. Code: https://github.com/WHITELOTUS0/dropout-prunability (already set in `kaggle_notebook.ipynb`). Attach your CIFAR-10 tarball dataset and the previous notebook version as Inputs: the first cell copies the tarball and restores trained models so nothing is retrained.
 2. New Kaggle notebook → File → Import notebook → upload `kaggle_notebook.ipynb`.
 3. Settings: Accelerator **GPU T4 x2**, Internet **On**.
 4. Run the pilot cell first (1 epoch, ~1 min) then the matrix cell. Use *Save & Run All (Commit)* for long runs so `/kaggle/working` is preserved;
