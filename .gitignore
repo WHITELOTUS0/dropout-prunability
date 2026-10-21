@@ -1,7 +1,8 @@
 data/
 runs*/
-figures/
+figures*/
 __pycache__/
 *.pt
 *.tar.gz
 .venv/
+.DS_Store
