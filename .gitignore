@@ -1,0 +1,7 @@
+data/
+runs*/
+figures/
+__pycache__/
+*.pt
+*.tar.gz
+.venv/
