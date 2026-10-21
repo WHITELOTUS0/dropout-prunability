@@ -28,18 +28,18 @@ def main():
 
     device = get_device(args.device)
     log = load_json(os.path.join(args.run, "train_log.json"))
-    p = log["args"]["p"]; seed = log["args"]["seed"]
+    p = log["args"]["p"]; seed = log["args"]["seed"]; where = log["args"].get("where", "head")
     data = load_cifar10(args.data, device)
     xtr, ytr = data["train"]; xtr, ytr = xtr[:args.n_train_eval], ytr[:args.n_train_eval]
     xte, yte = data["test"]
 
-    base = ResNet18CIFAR(10, p).to(device)
+    base = ResNet18CIFAR(10, p, where).to(device)
     base.load_state_dict(torch.load(os.path.join(args.run, "model.pt"), map_location=device))
     base.eval()
     dense_loss, dense_acc = evaluate(base, xte, yte)
     dense_trl, dense_tra = evaluate(base, xtr, ytr)
     print(f"[{os.path.basename(args.run)}] dense test_acc {dense_acc:.2f}")
-    res = {"p": p, "seed": seed, "dense": {"test_acc": dense_acc, "test_loss": dense_loss,
+    res = {"p": p, "seed": seed, "where": where, "dense": {"test_acc": dense_acc, "test_loss": dense_loss,
                                             "train_acc": dense_tra, "train_loss": dense_trl},
            "sparsities": SPARSITIES, "magnitude": [], "magnitude_bnrecal": [], "random": []}
 

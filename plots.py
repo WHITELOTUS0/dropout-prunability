@@ -23,12 +23,14 @@ def color(p):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default="runs"); ap.add_argument("--out", default="figures")
+    ap.add_argument("--where", default="head", choices=["head", "block"], help="which dropout placement to plot")
     a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
 
     runs = []
     for d in sorted(glob.glob(os.path.join(a.runs, "p*_s*"))):
         if not os.path.exists(os.path.join(d, "train_log.json")): continue
         tl = load_json(os.path.join(d, "train_log.json"))
+        if tl["args"].get("where", "head") != a.where: continue
         ps = load_json(os.path.join(d, "prune_sweep.json")) if os.path.exists(os.path.join(d, "prune_sweep.json")) else None
         ft = [load_json(f) for f in glob.glob(os.path.join(d, "ft_*.json"))]
         runs.append({"dir": d, "p": tl["args"]["p"], "seed": tl["args"]["seed"], "train": tl, "sweep": ps, "ft": ft})

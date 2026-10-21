@@ -51,7 +51,7 @@ def main():
 
     device = get_device(args.device)
     tlog = load_json(os.path.join(args.run, "train_log.json"))
-    p, seed = tlog["args"]["p"], tlog["args"]["seed"]
+    p, seed, where = tlog["args"]["p"], tlog["args"]["seed"], tlog["args"].get("where", "head")
     set_seed(seed + 7)
     data = load_cifar10(args.data, device)
     xtr, ytr = data["train"]
@@ -60,7 +60,7 @@ def main():
     use_amp = device.type == "cuda"
     gen = make_gen(device, seed + 7)
 
-    model = ResNet18CIFAR(10, p).to(device)
+    model = ResNet18CIFAR(10, p, where).to(device)
     model.load_state_dict(torch.load(os.path.join(args.run, "model.pt"), map_location=device))
     dense_acc = evaluate(model, xte, yte)[1]
     res = {"p": p, "seed": seed, "sparsity": args.sparsity, "schedule": args.schedule, "ft_epochs": args.ft_epochs,

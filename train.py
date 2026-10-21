@@ -12,6 +12,7 @@ from dp.common import get_device, set_seed, make_gen, evaluate, save_json
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--p", type=float, default=0.0, help="dropout probability")
+    ap.add_argument("--where", default="head", choices=["head", "block"], help="dropout placement (block = E2 Dropout2d)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=100)
     ap.add_argument("--lr", type=float, default=0.1)
@@ -26,7 +27,7 @@ def main():
 
     device = get_device(args.device)
     set_seed(args.seed)
-    tag = f"p{args.p}_s{args.seed}"
+    tag = f"p{args.p}_s{args.seed}" if args.where == "head" else f"p{args.p}blk_s{args.seed}"
     out_dir = os.path.join(args.out, tag)
     os.makedirs(out_dir, exist_ok=True)
     print(f"[{tag}] device={device} out={out_dir}")
@@ -37,7 +38,7 @@ def main():
         xtr, ytr = xtr[:args.subset], ytr[:args.subset]
     xval, yval = data["val"]; xte, yte = data["test"]
 
-    model = ResNet18CIFAR(10, args.p).to(device)
+    model = ResNet18CIFAR(10, args.p, args.where).to(device)
     if device.type == "cuda":
         model = model.to(memory_format=torch.channels_last)
     print(f"params: {count_params(model):,}")
