@@ -1,6 +1,8 @@
 """Extension E1: one-shot vs iterative magnitude pruning at a matched 20-epoch fine-tuning budget.
   one-shot : prune to s, fine-tune 20 epochs
   iterative: 4 equal cumulative steps to s (e.g. 20->40->60->80), 5 fine-tune epochs each
+  frontload: same 4 cumulative steps, but the first 3 get --early_epochs (default 2) each and the
+             final step gets the rest (14), so most of the budget is spent at the target sparsity
 Usage: python finetune.py --run runs/p0.3_s0 --sparsity 0.9 --schedule iterative
 Writes <run>/ft_{schedule}_s{sparsity}.json"""
 import argparse, copy, math, os, time
@@ -38,9 +40,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True)
     ap.add_argument("--sparsity", type=float, required=True)
-    ap.add_argument("--schedule", choices=["oneshot", "iterative"], required=True)
+    ap.add_argument("--schedule", choices=["oneshot", "iterative", "frontload"], required=True)
     ap.add_argument("--ft_epochs", type=int, default=20)
     ap.add_argument("--steps", type=int, default=4)
+    ap.add_argument("--early_epochs", type=int, default=2, help="frontload: fine-tune epochs for each non-final step")
     ap.add_argument("--lr", type=float, default=0.01)
     ap.add_argument("--wd", type=float, default=5e-4)
     ap.add_argument("--bs", type=int, default=128)
@@ -69,6 +72,11 @@ def main():
 
     if args.schedule == "oneshot":
         targets, ep_per = [args.sparsity], [args.ft_epochs]
+    elif args.schedule == "frontload":
+        targets = [args.sparsity * (i + 1) / args.steps for i in range(args.steps)]
+        ep_per = [args.early_epochs] * (args.steps - 1)
+        ep_per.append(args.ft_epochs - sum(ep_per))
+        assert ep_per[-1] > 0, "early_epochs * (steps-1) must be < ft_epochs"
     else:
         targets = [args.sparsity * (i + 1) / args.steps for i in range(args.steps)]
         ep_per = [args.ft_epochs // args.steps] * args.steps

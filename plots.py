@@ -149,7 +149,7 @@ def main():
         print(fdf.round(2).to_string(index=False))
         fig, ax = plt.subplots(figsize=(5.5, 3.4))
         for p in ps_all:
-            for sch, ls, mk in [("oneshot", "--", "s"), ("iterative", "-", "o")]:
+            for sch, ls, mk in [("oneshot", "--", "s"), ("iterative", "-", "o"), ("frontload", ":", "^")]:
                 d = fdf[(fdf.p == p) & (fdf.schedule == sch)].groupby("sparsity")["after_ft"].mean()
                 if len(d): ax.plot(d.index * 100, d.values, color=color(p), ls=ls, marker=mk, ms=4, lw=1.8, label=f"p={p} {sch}")
         ax.set(xlabel="sparsity (%)", ylabel="test acc after 20 ft epochs (%)", title="One-shot vs iterative (matched budget)")

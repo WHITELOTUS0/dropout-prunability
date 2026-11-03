@@ -7,7 +7,7 @@ Empirical study of dropout rate vs. post-training magnitude-pruning tolerance (R
 |---|---|---|
 | 1. Dense training, ResNet-18 + `nn.Dropout(p)` before the classifier | `train.py --p P --seed S --epochs 100` | `runs/pP_sS/model.pt`, `train_log.json` |
 | 2. Pruning probe (global magnitude, random baseline, BN-recal, weight stats, layer-wise sensitivity) | `prune_sweep.py --run runs/pP_sS` | `runs/pP_sS/prune_sweep.json` |
-| E1. One-shot vs iterative pruning, matched 20-epoch fine-tuning | `finetune.py --run runs/pP_sS --sparsity 0.9 --schedule iterative` | `runs/pP_sS/ft_*.json` |
+| E1. One-shot vs iterative pruning, matched 20-epoch fine-tuning (`oneshot`, `iterative` = 4 steps x 5 epochs, `frontload` = 4 steps with 2+2+2+14 epochs) | `finetune.py --run runs/pP_sS --sparsity 0.9 --schedule iterative` | `runs/pP_sS/ft_*.json` |
 | 3. Figures and tables | `plots.py --runs runs --out figures` | `figures/*.png`, `summary.csv`, `*.md` tables |
 
 `run_matrix.sh "0.0 0.1 0.3 0.5" "0 1 2" 100 GPU_ID` runs stages 1+2 for a grid and skips finished runs (resumable across Kaggle sessions).
